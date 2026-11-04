@@ -5,13 +5,11 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 
+[lints]
+workspace = true
+
 [dependencies]
 sportscraft-kinematics = { path = "../sportscraft-kinematics" }
-databasecraft-store.workspace = true
-databasecraft-core.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
-tokio.workspace = true
-chrono.workspace = true
-rusqlite.workspace = true
