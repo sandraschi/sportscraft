@@ -2,4 +2,11 @@
 **/*.rs.bk
 *.dbcraft
 *.bak
+*.bak.*
 *.exe
+# Kibitzer side-channel (gitignored, polled by Antigravity, refreshed 2x/day)
+KIBITZ.md
+# Regenerable assess reports (the committed copy lives in docs/assess-reports/)
+reports/
+# Release artifacts
+/dist/
