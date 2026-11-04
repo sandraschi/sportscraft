@@ -11,6 +11,7 @@ struct Args {
 
 pub struct SportsCraftApp {
     athlete_name: String,
+    locale: sportscraft_core::i18n::AppLocale,
     target_distance: f64,
     status_msg: String,
     is_dark_theme: bool,
@@ -25,6 +26,7 @@ impl SportsCraftApp {
     pub fn new() -> Self {
         Self {
             athlete_name: "ATHLETE-ELITE-1".to_string(),
+            locale: sportscraft_core::i18n::AppLocale::default(),
             target_distance: 10000.0,
             status_msg: "SportsCraft Studio Ready (Port 14131)".to_string(),
             is_dark_theme: true,
@@ -118,6 +120,17 @@ impl eframe::App for SportsCraftApp {
                 });
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    let cur_loc = self.locale;
+                    let label = format!("{} {}", cur_loc.flag(), cur_loc.code().to_uppercase());
+                    egui::ComboBox::from_id_salt("topbar_locale_selector")
+                        .selected_text(label)
+                        .show_ui(ui, |ui| {
+                            for loc_item in sportscraft_core::i18n::AppLocale::all() {
+                                let text = format!("{} {}", loc_item.flag(), loc_item.display_name());
+                                let _ = ui.selectable_value(&mut self.locale, *loc_item, text);
+                            }
+                        });
+
                     let (icon, label) = if self.is_dark_theme { ("☀", "Light") } else { ("🌙", "Dark") };
                     if ui.small_button(format!("{icon} {label}")).clicked() {
                         self.is_dark_theme = !self.is_dark_theme;

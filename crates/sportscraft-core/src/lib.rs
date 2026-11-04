@@ -3,6 +3,8 @@
 //! Provides physiological load aggregation, race pacing predictions,
 //! and training log persistence backed by DatabaseCraft.
 
+pub mod i18n;
+
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use sportscraft_kinematics::{BanisterProfile, BiomechanicsModel, GaitAnalysis};
