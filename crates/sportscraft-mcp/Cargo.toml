@@ -1,0 +1,15 @@
+[package]
+name = "sportscraft-mcp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+sportscraft-core = { path = "../sportscraft-core" }
+sportscraft-kinematics = { path = "../sportscraft-kinematics" }
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+thiserror.workspace = true
+chrono.workspace = true
