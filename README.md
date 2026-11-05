@@ -88,6 +88,18 @@ race-ready window (`+5 .. +18`) is meaningful; a 21-day taper from a hard block
 reaches it. With no taper, a hard 14-day demo block sits around `-53`, and the
 UI shows the target range so the gap is visible rather than hidden.
 
+## Status — does today / next week / non-goals
+
+**Does today:** core/kinematics/mcp/app; Banister CTL/ATL/TSB + race pacing
+(800 m–100 km) + IMU gait; all demo output labeled `source: demo`; NSIS
+installer posture; 16 test fns.
+
+**Next week:** golden Banister fixtures (known TRIMP → exact CTL/ATL); CSV
+importer decision + source labeling; banister-sim recipe.
+
+**Non-goals:** not medical advice (pacing guidance carries the line); no
+wearable auto-sync yet.
+
 ## Lineage — the Storytold craft-app pattern
 
 Storytold ArtCraft ([storytold/artcraft](https://github.com/storytold/artcraft) — "the IDE for artists") was the starting point. The 16 craft apps in the Storytold stable each ship one binary that is both the human CLI and the agent MCP server (stdio), headless-first, with `run.json` + report artifacts. That modus operandi and harness is what this repo implements; the code here is independent, the pattern is shared.
