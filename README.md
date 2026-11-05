@@ -87,3 +87,7 @@ TSB is `CTL - ATL` in TRIMP points. Both impulses use weight 1.0 so the
 race-ready window (`+5 .. +18`) is meaningful; a 21-day taper from a hard block
 reaches it. With no taper, a hard 14-day demo block sits around `-53`, and the
 UI shows the target range so the gap is visible rather than hidden.
+
+## Lineage — the Storytold craft-app pattern
+
+Storytold ArtCraft ([storytold/artcraft](https://github.com/storytold/artcraft) — "the IDE for artists") was the starting point. The 16 craft apps in the Storytold stable each ship one binary that is both the human CLI and the agent MCP server (stdio), headless-first, with `run.json` + report artifacts. That modus operandi and harness is what this repo implements; the code here is independent, the pattern is shared.
