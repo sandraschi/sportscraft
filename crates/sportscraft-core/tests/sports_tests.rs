@@ -1,7 +1,7 @@
 //! Regression tests for the Banister engine, pacing prediction, and the
 //! `Command::dispatch` bus shared by the CLI and MCP surfaces.
 use sportscraft_core::i18n::{t, AppLocale, I18nKey};
-use sportscraft_core::{Command, SportsEngine, OPTIMAL_TSB_WINDOW};
+use sportscraft_core::{soccer, trainer, Command, SportsEngine, OPTIMAL_TSB_WINDOW};
 use sportscraft_kinematics::{BanisterProfile, BiomechanicsModel};
 
 fn profile_with(history: &[f64]) -> BanisterProfile {
@@ -133,4 +133,133 @@ fn i18n_ui_strings_are_real_per_locale() {
         assert!(!t(I18nKey::LabelForm, *locale).is_empty());
         assert!(!t(I18nKey::PanelPacing, *locale).is_empty());
     }
+}
+
+#[test]
+fn soccer_has_five_european_leagues() {
+    let leagues = soccer::leagues();
+    assert_eq!(leagues.len(), 5);
+    assert!(leagues.iter().any(|l| l.code == "ENG1"));
+    assert!(leagues.iter().any(|l| l.code == "GER1"));
+}
+
+#[test]
+fn soccer_standings_points_are_consistent() {
+    let rows = soccer::standings("ENG1").unwrap_or_default();
+    assert_eq!(rows.len(), 6);
+    for row in &rows {
+        assert_eq!(row.points, row.won * 3 + row.drawn);
+        assert_eq!(row.played, row.won + row.drawn + row.lost);
+    }
+}
+
+#[test]
+fn soccer_unknown_league_is_none() {
+    assert!(soccer::standings("XX9").is_none());
+    assert!(soccer::fixtures("XX9").is_none());
+}
+
+#[test]
+fn soccer_predict_favours_the_stronger_home_side() {
+    let result = soccer::predict("Man City", "Nice");
+    assert!(result.is_ok());
+    if let Ok(prediction) = result {
+        assert!(prediction.home_win_pct > prediction.away_win_pct);
+        assert!(
+            (prediction.home_win_pct + prediction.draw_pct + prediction.away_win_pct - 100.0).abs()
+                < 1.0
+        );
+    }
+}
+
+#[test]
+fn soccer_predict_rejects_unknown_teams() {
+    assert!(soccer::predict("Man City", "Atlantis FC").is_err());
+}
+
+#[test]
+fn trainer_home_catalog_has_no_gym_only_machines() {
+    let home = trainer::catalog(trainer::Location::Home);
+    assert!(!home.is_empty());
+    assert!(home.iter().all(|item| item.location != "gym"));
+    assert!(home.iter().any(|item| item.id == "pushup"));
+}
+
+#[test]
+fn trainer_plan_builds_requested_days_with_trimp() {
+    let result = trainer::plan(
+        trainer::Goal::General,
+        trainer::Location::Home,
+        3,
+        trainer::Level::Beginner,
+    );
+    assert!(result.is_ok());
+    if let Ok(plan) = result {
+        assert_eq!(plan.days.len(), 3);
+        assert!(plan.days.iter().all(|day| !day.exercises.is_empty()));
+        assert!(plan.days.iter().all(|day| day.estimated_trimp > 0.0));
+    }
+}
+
+#[test]
+fn trainer_plan_rejects_day_counts_outside_two_to_five() {
+    assert!(trainer::plan(
+        trainer::Goal::Strength,
+        trainer::Location::Gym,
+        1,
+        trainer::Level::Intermediate,
+    )
+    .is_err());
+    assert!(trainer::plan(
+        trainer::Goal::Strength,
+        trainer::Location::Gym,
+        6,
+        trainer::Level::Intermediate,
+    )
+    .is_err());
+}
+
+#[test]
+fn trainer_session_carries_disclaimer_and_coaching() {
+    let result = trainer::session(
+        trainer::Goal::Conditioning,
+        trainer::Location::Gym,
+        trainer::Level::Intermediate,
+        45,
+    );
+    assert!(result.is_ok());
+    if let Ok(session) = result {
+        assert!(!session.main.is_empty());
+        assert!(!session.coaching.is_empty());
+        assert!(session.disclaimer.contains("not medical advice"));
+        assert!(session.estimated_trimp > 0.0);
+    }
+}
+
+#[test]
+fn dispatch_soccer_and_trainer_arms_are_demo_labeled() {
+    let standings = Command::SoccerStandings {
+        league: "ENG1".to_string(),
+    }
+    .dispatch();
+    assert_eq!(
+        standings.get("source").and_then(|value| value.as_str()),
+        Some("demo")
+    );
+    let catalog = Command::TrainerCatalog {
+        location: "home".to_string(),
+    }
+    .dispatch();
+    assert_eq!(
+        catalog.get("source").and_then(|value| value.as_str()),
+        Some("demo")
+    );
+    let bad = Command::SoccerStandings {
+        league: "XX9".to_string(),
+    }
+    .dispatch();
+    assert_eq!(
+        bad.get("success").and_then(|value| value.as_bool()),
+        Some(false)
+    );
 }

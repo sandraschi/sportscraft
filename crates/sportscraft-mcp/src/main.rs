@@ -77,6 +77,84 @@ fn tools_list() -> Value {
                 "description": "IMU gait kinematics fixture: cadence, vertical oscillation, ground contact time, leg spring stiffness, asymmetry. source=demo (no sensor attached).",
                 "inputSchema": {"type": "object", "properties": {}},
             },
+            {
+                "name": "soccer.leagues",
+                "description": "List the five demo European soccer leagues (Premier League, La Liga, Bundesliga, Serie A, Ligue 1). source=demo.",
+                "inputSchema": {"type": "object", "properties": {}},
+            },
+            {
+                "name": "soccer.standings",
+                "description": "Demo league table (played/won/drawn/lost, goals, points, form). source=demo.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "league": {"type": "string", "description": "League code: ENG1, ESP1, GER1, ITA1, FRA1."},
+                    },
+                    "required": ["league"],
+                },
+            },
+            {
+                "name": "soccer.fixtures",
+                "description": "Demo upcoming fixtures for a league with kickoff labels and venues. source=demo.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "league": {"type": "string", "description": "League code: ENG1, ESP1, GER1, ITA1, FRA1."},
+                    },
+                    "required": ["league"],
+                },
+            },
+            {
+                "name": "soccer.predict",
+                "description": "Predict a match from demo ratings (win/draw/away %, expected goals, pick). source=demo.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "home": {"type": "string", "description": "Home team name (e.g. Man City)."},
+                        "away": {"type": "string", "description": "Away team name (e.g. Arsenal)."},
+                    },
+                    "required": ["home", "away"],
+                },
+            },
+            {
+                "name": "trainer.catalog",
+                "description": "Exercise library filtered by location (gym sees gym+both, home sees home+both). source=demo.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "location": {"type": "string", "description": "gym or home."},
+                    },
+                    "required": ["location"],
+                },
+            },
+            {
+                "name": "trainer.plan",
+                "description": "Build a weekly gym/home plan (2-5 days) for a goal and level. General fitness info, not medical advice. source=demo.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "goal": {"type": "string", "description": "strength, hypertrophy, conditioning, general."},
+                        "location": {"type": "string", "description": "gym or home."},
+                        "days_per_week": {"type": "integer", "description": "2-5."},
+                        "level": {"type": "string", "description": "beginner, intermediate, advanced."},
+                    },
+                    "required": ["goal", "location", "days_per_week", "level"],
+                },
+            },
+            {
+                "name": "trainer.session",
+                "description": "Build one coached workout (warmup, main, cooldown, TRIMP estimate, cues). General fitness info, not medical advice. source=demo.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "goal": {"type": "string", "description": "strength, hypertrophy, conditioning, general."},
+                        "location": {"type": "string", "description": "gym or home."},
+                        "level": {"type": "string", "description": "beginner, intermediate, advanced."},
+                        "minutes": {"type": "integer", "description": "15-120."},
+                    },
+                    "required": ["goal", "location", "level", "minutes"],
+                },
+            },
         ]
     })
 }
@@ -102,6 +180,16 @@ fn arg_string(args: &Value, key: &str, default: &str) -> String {
         .unwrap_or_else(|| default.to_string())
 }
 
+fn arg_u32(args: &Value, key: &str) -> Option<u32> {
+    args.get(key).and_then(Value::as_u64).and_then(|value| {
+        if value <= u32::MAX as u64 {
+            Some(value as u32)
+        } else {
+            None
+        }
+    })
+}
+
 /// Dispatch one `tools/call`. Unknown tools become `isError` content, never a panic.
 fn call_tool(name: &str, args: &Value) -> Value {
     let athlete = arg_string(args, "athlete", "ATHLETE-ELITE-1");
@@ -121,6 +209,78 @@ fn call_tool(name: &str, args: &Value) -> Value {
             }
         }
         "gait.analyze" | "gait_analyze" => Command::Gait,
+        "soccer.leagues" | "soccer_leagues" => Command::SoccerLeagues,
+        "soccer.standings" | "soccer_standings" => {
+            let league = arg_string(args, "league", "");
+            if league.trim().is_empty() {
+                return error_result("`league` is required (ENG1, ESP1, GER1, ITA1, FRA1)");
+            }
+            Command::SoccerStandings { league }
+        }
+        "soccer.fixtures" | "soccer_fixtures" => {
+            let league = arg_string(args, "league", "");
+            if league.trim().is_empty() {
+                return error_result("`league` is required (ENG1, ESP1, GER1, ITA1, FRA1)");
+            }
+            Command::SoccerFixtures { league }
+        }
+        "soccer.predict" | "soccer_predict" => {
+            let home = arg_string(args, "home", "");
+            let away = arg_string(args, "away", "");
+            if home.trim().is_empty() || away.trim().is_empty() {
+                return error_result("`home` and `away` are required team names");
+            }
+            Command::SoccerPredict { home, away }
+        }
+        "trainer.catalog" | "trainer_catalog" => {
+            let location = arg_string(args, "location", "");
+            if location.trim().is_empty() {
+                return error_result("`location` is required (gym or home)");
+            }
+            Command::TrainerCatalog { location }
+        }
+        "trainer.plan" | "trainer_plan" => {
+            let goal = arg_string(args, "goal", "");
+            let location = arg_string(args, "location", "");
+            let level = arg_string(args, "level", "");
+            let days = arg_u32(args, "days_per_week");
+            if goal.trim().is_empty()
+                || location.trim().is_empty()
+                || level.trim().is_empty()
+                || days.is_none()
+            {
+                return error_result(
+                    "`goal`, `location`, `days_per_week` (2-5), `level` are all required",
+                );
+            }
+            Command::TrainerPlan {
+                goal,
+                location,
+                days_per_week: days.unwrap_or(3),
+                level,
+            }
+        }
+        "trainer.session" | "trainer_session" => {
+            let goal = arg_string(args, "goal", "");
+            let location = arg_string(args, "location", "");
+            let level = arg_string(args, "level", "");
+            let minutes = arg_u32(args, "minutes");
+            if goal.trim().is_empty()
+                || location.trim().is_empty()
+                || level.trim().is_empty()
+                || minutes.is_none()
+            {
+                return error_result(
+                    "`goal`, `location`, `level`, `minutes` (15-120) are all required",
+                );
+            }
+            Command::TrainerSession {
+                goal,
+                location,
+                level,
+                minutes: minutes.unwrap_or(45),
+            }
+        }
         other => {
             return error_result(&format!("unknown tool: {other}"));
         }
@@ -173,7 +333,7 @@ fn run_mcp_stdio() {
                     "name": "sportscraft",
                     "version": env!("CARGO_PKG_VERSION")
                 },
-                "instructions": "SportsCraft biomechanics: Banister CTL/ATL/TSB, race pacing, IMU gait (demo data)."
+                "instructions": "SportsCraft: Banister CTL/ATL/TSB, race pacing, IMU gait (demo), European soccer spectator tables + predictor (demo), gym/home personal trainer (demo)."
             })),
             "notifications/initialized" | "initialized" => None,
             "tools/list" => Some(tools_list()),
@@ -244,7 +404,7 @@ mod tests {
         let tools = catalog.get("tools").and_then(Value::as_array);
         assert!(tools.is_some());
         if let Some(tools) = tools {
-            assert_eq!(tools.len(), 4);
+            assert_eq!(tools.len(), 11);
         }
     }
 
@@ -266,6 +426,38 @@ mod tests {
         let result = call_tool("athlete.predict", &json!({"distance_m": 0.0}));
         let text = content_text(&result);
         assert!(text.contains("invalid input"));
+    }
+
+    #[test]
+    fn soccer_standings_needs_league() {
+        let result = call_tool("soccer.standings", &json!({}));
+        assert_eq!(result.get("isError"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn soccer_predict_routes_to_demo_payload() {
+        let result = call_tool(
+            "soccer.predict",
+            &json!({"home": "Man City", "away": "Arsenal"}),
+        );
+        assert_eq!(result.get("isError"), Some(&json!(false)));
+        assert!(content_text(&result).contains("\"source\":\"demo\""));
+    }
+
+    #[test]
+    fn trainer_plan_needs_all_args() {
+        let result = call_tool("trainer.plan", &json!({"goal": "general"}));
+        assert_eq!(result.get("isError"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn trainer_session_routes_to_demo_payload() {
+        let result = call_tool(
+            "trainer.session",
+            &json!({"goal": "general", "location": "home", "level": "beginner", "minutes": 30}),
+        );
+        assert_eq!(result.get("isError"), Some(&json!(false)));
+        assert!(content_text(&result).contains("\"source\":\"demo\""));
     }
 
     #[test]

@@ -28,6 +28,30 @@ enum Commands {
     Predict { athlete: String, distance_m: f64 },
     /// Inspect IMU gait kinematics (demo fixture)
     Gait,
+    /// List European soccer leagues (demo)
+    SoccerLeagues,
+    /// Show demo standings for a league (ENG1, ESP1, GER1, ITA1, FRA1)
+    SoccerStandings { league: String },
+    /// Show demo fixtures for a league
+    SoccerFixtures { league: String },
+    /// Predict a match from demo ratings
+    SoccerPredict { home: String, away: String },
+    /// List trainer exercises for a location (gym, home)
+    TrainerCatalog { location: String },
+    /// Build a weekly plan: goal location days_per_week level
+    TrainerPlan {
+        goal: String,
+        location: String,
+        days_per_week: u32,
+        level: String,
+    },
+    /// Build one coached workout: goal location level minutes
+    TrainerSession {
+        goal: String,
+        location: String,
+        level: String,
+        minutes: u32,
+    },
 }
 
 impl From<Commands> for Command {
@@ -43,6 +67,33 @@ impl From<Commands> for Command {
                 distance_m,
             },
             Commands::Gait => Command::Gait,
+            Commands::SoccerLeagues => Command::SoccerLeagues,
+            Commands::SoccerStandings { league } => Command::SoccerStandings { league },
+            Commands::SoccerFixtures { league } => Command::SoccerFixtures { league },
+            Commands::SoccerPredict { home, away } => Command::SoccerPredict { home, away },
+            Commands::TrainerCatalog { location } => Command::TrainerCatalog { location },
+            Commands::TrainerPlan {
+                goal,
+                location,
+                days_per_week,
+                level,
+            } => Command::TrainerPlan {
+                goal,
+                location,
+                days_per_week,
+                level,
+            },
+            Commands::TrainerSession {
+                goal,
+                location,
+                level,
+                minutes,
+            } => Command::TrainerSession {
+                goal,
+                location,
+                level,
+                minutes,
+            },
         }
     }
 }

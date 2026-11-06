@@ -9,6 +9,8 @@
 #![deny(clippy::todo)]
 
 pub mod i18n;
+pub mod soccer;
+pub mod trainer;
 
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -104,9 +106,40 @@ impl SportsEngine {
 #[serde(tag = "command", rename_all = "snake_case")]
 pub enum Command {
     Status,
-    Profile { athlete: String },
-    Predict { athlete: String, distance_m: f64 },
+    Profile {
+        athlete: String,
+    },
+    Predict {
+        athlete: String,
+        distance_m: f64,
+    },
     Gait,
+    SoccerLeagues,
+    SoccerStandings {
+        league: String,
+    },
+    SoccerFixtures {
+        league: String,
+    },
+    SoccerPredict {
+        home: String,
+        away: String,
+    },
+    TrainerCatalog {
+        location: String,
+    },
+    TrainerPlan {
+        goal: String,
+        location: String,
+        days_per_week: u32,
+        level: String,
+    },
+    TrainerSession {
+        goal: String,
+        location: String,
+        level: String,
+        minutes: u32,
+    },
 }
 
 impl Command {
@@ -120,7 +153,9 @@ impl Command {
                 "fitness_tau_days": 42.0,
                 "fatigue_tau_days": 7.0,
                 "optimal_tsb_window": [OPTIMAL_TSB_WINDOW.0, OPTIMAL_TSB_WINDOW.1],
-                "commands": ["status", "profile", "predict", "gait"],
+                "commands": ["status", "profile", "predict", "gait",
+                    "soccer_leagues", "soccer_standings", "soccer_fixtures", "soccer_predict",
+                    "trainer_catalog", "trainer_plan", "trainer_session"],
                 "history_source": "demo",
             }),
             Command::Profile { athlete } => {
@@ -162,6 +197,101 @@ impl Command {
                 }
                 Err(error) => json!({"success": false, "error": error.to_string()}),
             },
+            Command::SoccerLeagues => json!({
+                "success": true,
+                "source": "demo",
+                "leagues": soccer::leagues(),
+            }),
+            Command::SoccerStandings { league } => match soccer::standings(league) {
+                Some(rows) => json!({
+                    "success": true, "source": "demo",
+                    "league": league.to_uppercase(), "standings": rows,
+                }),
+                None => json!({"success": false,
+                        "error": format!("unknown league: {league} (try ENG1, ESP1, GER1, ITA1, FRA1)")}),
+            },
+            Command::SoccerFixtures { league } => match soccer::fixtures(league) {
+                Some(rows) => json!({
+                    "success": true, "source": "demo",
+                    "league": league.to_uppercase(), "fixtures": rows,
+                }),
+                None => json!({"success": false,
+                        "error": format!("unknown league: {league} (try ENG1, ESP1, GER1, ITA1, FRA1)")}),
+            },
+            Command::SoccerPredict { home, away } => match soccer::predict(home, away) {
+                Ok(prediction) => match serde_json::to_value(&prediction) {
+                    Ok(mut value) => {
+                        if let Some(object) = value.as_object_mut() {
+                            object.insert("success".to_string(), json!(true));
+                            object.insert("source".to_string(), json!("demo"));
+                        }
+                        value
+                    }
+                    Err(error) => json!({"success": false, "error": error.to_string()}),
+                },
+                Err(error) => json!({"success": false, "error": error}),
+            },
+            Command::TrainerCatalog { location } => match trainer::parse_location(location) {
+                Ok(loc) => json!({
+                    "success": true, "source": "demo",
+                    "location": location.to_lowercase(),
+                    "exercises": trainer::catalog(loc),
+                    "disclaimer": trainer::DISCLAIMER,
+                }),
+                Err(error) => json!({"success": false, "error": error}),
+            },
+            Command::TrainerPlan {
+                goal,
+                location,
+                days_per_week,
+                level,
+            } => {
+                let parsed = trainer::parse_goal(goal)
+                    .and_then(|g| trainer::parse_location(location).map(|l| (g, l)))
+                    .and_then(|(g, l)| trainer::parse_level(level).map(|v| (g, l, v)));
+                match parsed {
+                    Ok((g, l, v)) => match trainer::plan(g, l, *days_per_week, v) {
+                        Ok(plan) => match serde_json::to_value(&plan) {
+                            Ok(mut value) => {
+                                if let Some(object) = value.as_object_mut() {
+                                    object.insert("success".to_string(), json!(true));
+                                    object.insert("source".to_string(), json!("demo"));
+                                }
+                                value
+                            }
+                            Err(error) => json!({"success": false, "error": error.to_string()}),
+                        },
+                        Err(error) => json!({"success": false, "error": error}),
+                    },
+                    Err(error) => json!({"success": false, "error": error}),
+                }
+            }
+            Command::TrainerSession {
+                goal,
+                location,
+                level,
+                minutes,
+            } => {
+                let parsed = trainer::parse_goal(goal)
+                    .and_then(|g| trainer::parse_location(location).map(|l| (g, l)))
+                    .and_then(|(g, l)| trainer::parse_level(level).map(|v| (g, l, v)));
+                match parsed {
+                    Ok((g, l, v)) => match trainer::session(g, l, v, *minutes) {
+                        Ok(session) => match serde_json::to_value(&session) {
+                            Ok(mut value) => {
+                                if let Some(object) = value.as_object_mut() {
+                                    object.insert("success".to_string(), json!(true));
+                                    object.insert("source".to_string(), json!("demo"));
+                                }
+                                value
+                            }
+                            Err(error) => json!({"success": false, "error": error.to_string()}),
+                        },
+                        Err(error) => json!({"success": false, "error": error}),
+                    },
+                    Err(error) => json!({"success": false, "error": error}),
+                }
+            }
         }
     }
 }
