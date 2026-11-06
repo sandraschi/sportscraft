@@ -2040,7 +2040,7 @@ dependencies = [
 
 [[package]]
 name = "sportscraft-app"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "clap",
  "eframe",
@@ -2051,7 +2051,7 @@ dependencies = [
 
 [[package]]
 name = "sportscraft-core"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -2061,14 +2061,14 @@ dependencies = [
 
 [[package]]
 name = "sportscraft-kinematics"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "sportscraft-mcp"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "serde_json",
  "sportscraft-core",

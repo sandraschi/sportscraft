@@ -5,7 +5,7 @@ Unicode true
 !include "MUI2.nsh"
 
 !define APP_NAME "SportsCraft"
-!define APP_VERSION "0.1.1"
+!define APP_VERSION "0.2.0"
 !define APP_PUBLISHER "Antigravity Craft Collective"
 !define APP_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\SportsCraft"
 
