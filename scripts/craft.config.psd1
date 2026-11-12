@@ -11,8 +11,10 @@
     CliPackage  = 'sportscraft-app'
     CliBin      = 'sportscraft-cli'
     CliSmoke    = @('status')
+    McpPackage  = 'sportscraft-mcp'
+    McpBin      = 'sportscraft-mcp'
     McpArgs     = @()
     McpSmoke    = @()
     Installer   = $true
-    Mcpb        = $false
+    Mcpb        = $true
 }

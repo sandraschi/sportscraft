@@ -1,0 +1,75 @@
+{
+  "manifest_version": "0.2",
+  "name": "sportscraft",
+  "display_name": "SportsCraft",
+  "version": "__VERSION__",
+  "description": "SportsCraft MCP server (11 tools).",
+  "author": {
+    "name": "Sandra Schipal",
+    "url": "https://github.com/sandraschi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sandraschi/sportscraft"
+  },
+  "license": "MIT OR Apache-2.0",
+  "server": {
+    "type": "binary",
+    "entry_point": "sportscraft-mcp.exe",
+    "mcp_config": {
+      "command": "${__dirname}/sportscraft-mcp.exe",
+      "args": []
+    }
+  },
+  "compatibility": {
+    "platforms": [
+      "win32"
+    ]
+  },
+  "tools": [
+    {
+      "name": "status",
+      "description": "Engine status: version, Banister time constants, optimal TSB window, demo-data markers."
+    },
+    {
+      "name": "athlete.profile",
+      "description": "Banister CTL (fitness), ATL (fatigue) and TSB (form) for an athlete, folded over the demo TRIMP history. history_source=demo."
+    },
+    {
+      "name": "athlete.predict",
+      "description": "Predict finish time and recommended pace for a target distance from current chronic fitness."
+    },
+    {
+      "name": "gait.analyze",
+      "description": "IMU gait kinematics fixture: cadence, vertical oscillation, ground contact time, leg spring stiffness, asymmetry. source=demo (no sensor attached)."
+    },
+    {
+      "name": "soccer.leagues",
+      "description": "List the five demo European soccer leagues (Premier League, La Liga, Bundesliga, Serie A, Ligue 1). source=demo."
+    },
+    {
+      "name": "soccer.standings",
+      "description": "Demo league table (played/won/drawn/lost, goals, points, form). source=demo."
+    },
+    {
+      "name": "soccer.fixtures",
+      "description": "Demo upcoming fixtures for a league with kickoff labels and venues. source=demo."
+    },
+    {
+      "name": "soccer.predict",
+      "description": "Predict a match from demo ratings (win/draw/away %, expected goals, pick). source=demo."
+    },
+    {
+      "name": "trainer.catalog",
+      "description": "Exercise library filtered by location (gym sees gym+both, home sees home+both). source=demo."
+    },
+    {
+      "name": "trainer.plan",
+      "description": "Build a weekly gym/home plan (2-5 days) for a goal and level. General fitness info, not medical advice. source=demo."
+    },
+    {
+      "name": "trainer.session",
+      "description": "Build one coached workout (warmup, main, cooldown, TRIMP estimate, cues). General fitness info, not medical advice. source=demo."
+    }
+  ]
+}
