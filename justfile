@@ -60,3 +60,15 @@ run-app: build
 # Build the current-user NSIS installer (requires NSIS)
 installer: build-release
     $nsis = "${env:ProgramFiles(x86)}\NSIS\makensis.exe"; if (-not (Test-Path $nsis)) { throw "makensis not found (winget install NSIS.NSIS)" }; & $nsis /NOCD installer\installer.nsi
+
+# Headless check: app and CLI smoke from scripts/craft.config.psd1 (throwaway database).
+smoke:
+    powershell -NoProfile -ExecutionPolicy Bypass -File start.ps1 -Smoke
+
+# Build and stage dist/ (plain exes, installer, launcher zip, SHA256SUMS). Nothing is published.
+release-dry:
+    powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1
+
+# Same, then tag, push the tag and upload to GitHub (clean, pushed trunk required).
+release:
+    powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1 -Publish
