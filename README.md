@@ -1,5 +1,10 @@
 # SportsCraft
 
+![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)
+![Rust 1.90+](https://img.shields.io/badge/rust-1.90%2B-orange?logo=rust)
+![MCP stdio](https://img.shields.io/badge/MCP-stdio-purple)
+![ArtCraft harness](https://img.shields.io/badge/ArtCraft-harness-green)
+
 **SportsCraft** is a local spectator + personal-trainer sports studio. It covers
 European soccer as a spectator (demo tables, fixtures, match predictor) and
 works as a personal trainer in the gym or at home (exercise library, weekly
