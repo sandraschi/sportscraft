@@ -1,6 +1,6 @@
 //! SportsCraft MCP Server
 //!
-//! Speaks MCP `2024-11-05` JSON-RPC over stdio. Stdout carries only JSON-RPC
+//! Speaks MCP `2026-07-28` JSON-RPC over stdio. Stdout carries only JSON-RPC
 //! frames; every log line goes to stderr. There is no network port: the Rust
 //! ArtCraft standard runs MCP over stdio and keeps the desktop app in-process.
 #![deny(clippy::unwrap_used)]
@@ -327,7 +327,7 @@ fn run_mcp_stdio() {
 
         let result: Option<Value> = match method {
             "initialize" => Some(json!({
-                "protocolVersion": "2024-11-05",
+                "protocolVersion": "2026-07-28",
                 "capabilities": {"tools": {}},
                 "serverInfo": {
                     "name": "sportscraft",

@@ -33,7 +33,7 @@ see `docs/DEVELOPMENT.md` for the release convention.
 ## 0.1.1 - 2026-11-05
 
 ### Fixed
-- `sportscraft-mcp` is now a real MCP server: MCP `2024-11-05` JSON-RPC over
+- `sportscraft-mcp` is now a real MCP server: MCP `2026-07-28` JSON-RPC over
   stdio with `initialize`, `notifications/initialized`, `tools/list`,
   `tools/call`, and `ping`. It previously printed a status banner and exited
   without reading stdin, while `README.md` advertised "FastMCP on port 14131".

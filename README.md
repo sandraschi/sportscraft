@@ -20,7 +20,7 @@ Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
 ```
 
-Installs the Windows app, the CLI, and the MCP bundle.
+Installs the Windows app and the CLI (Start Menu shortcut, CLI on the user PATH). `-RegisterClients` also registers the MCP exe with the IDEs that are installed. `-Clients cursor,claude-desktop` limits that list. `-Mcpb` installs the Claude Desktop extension bundle.
 
 ## What works
 
@@ -65,7 +65,7 @@ Be aware before installing:
 |---|---|
 | `crates/sportscraft-kinematics` | Banister solver, gait model (no CLI/MCP/UI deps) |
 | `crates/sportscraft-core` | Pacing prediction, soccer + trainer engines, i18n, `Command::dispatch` bus |
-| `crates/sportscraft-mcp` | MCP `2024-11-05` stdio server (`sportscraft-mcp.exe`) |
+| `crates/sportscraft-mcp` | MCP `2026-07-28` stdio server (`sportscraft-mcp.exe`) |
 | `crates/sportscraft-app` | Desktop studio (`sportscraft.exe`) and CLI (`sportscraft-cli.exe`) |
 
 The desktop app calls core in-process. There is no sidecar, no HTTP server, and

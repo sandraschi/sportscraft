@@ -5,7 +5,7 @@ the CLI, and the desktop UI. All of them call `sportscraft_core::Command::dispat
 
 ## MCP server (`sportscraft-mcp.exe`)
 
-Transport: MCP `2024-11-05` JSON-RPC over **stdio**. No TCP port. Logs go to
+Transport: MCP `2026-07-28` JSON-RPC over **stdio**. No TCP port. Logs go to
 stderr; stdout carries only JSON-RPC frames.
 
 ### `status`
