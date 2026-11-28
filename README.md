@@ -14,7 +14,7 @@ machine: no account, no cloud, no network port.
 
 ## Install
 
-Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+Tell Claude, Cursor, Antigravity, or OpenCode: **Install sportscraft from github sandraschi.**
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
